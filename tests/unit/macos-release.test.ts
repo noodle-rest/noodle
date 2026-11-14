@@ -76,30 +76,20 @@ function releaseAsset(target: string) {
 }
 
 describe("release platforms", () => {
-  it("changes the Bun runtime only for Windows", () => {
-    expect(bunVersion("win32-x64")).toBe("1.4.4")
+  it("uses Bun 1.4.4 for every platform and workflow", () => {
     for (const target of [
       "darwin-arm64",
       "darwin-x64",
       "linux-arm64",
       "linux-x64",
+      "win32-x64",
     ])
-      expect(bunVersion(target)).toBe("1.4.3")
+      expect(bunVersion(target)).toBe("1.4.4")
     for (const config of [ci, workflow]) {
-      for (const [name, job] of Object.entries(config.jobs)) {
+      for (const job of Object.values(config.jobs)) {
         for (const step of job.steps ?? []) {
           if (!step.uses?.startsWith("oven-sh/setup-bun@")) continue
-          const expected =
-            name === "test-windows"
-              ? bunVersion("win32-x64")
-              : [
-                    "platform-checks",
-                    "validate-release-artifact",
-                    "recover-publication",
-                  ].includes(name)
-                ? "${{ runner.os == 'Windows' && '1.4.4' || '1.4.3' }}"
-                : "1.4.3"
-          expect(step.with?.["bun-version"]).toBe(expected)
+          expect(step.with?.["bun-version"]).toBe("1.4.4")
         }
       }
     }

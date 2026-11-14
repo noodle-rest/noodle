@@ -29,6 +29,7 @@ Noodle 0.11.0 imports OpenAPI 3.1 documents, including FastAPI schemas, into edi
 
 ### 🔧 Refactors
 
+- Use Bun 1.4.4 throughout CI and release workflows, including artifact producer and verification metadata for all five supported binary targets.
 - Upgrade OpenTUI to 0.9.0 and refresh runtime and development dependencies. Align the checksummed Homebrew source resource with the installed OpenTUI version and validate source builds against Homebrew's current Zig version.
 - Move distribution, update, and release-site synchronization URLs to the `noodle-rest` organization while keeping the existing update manifest and checksum contract.
 

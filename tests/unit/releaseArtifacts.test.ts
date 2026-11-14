@@ -205,15 +205,7 @@ describe("validated release artifacts", () => {
       const output = join(root, "validated-build")
       try {
         expect(() =>
-          recordArtifact(
-            root,
-            output,
-            target,
-            sha,
-            "0.9.7",
-            "123",
-            target === "win32-x64" ? "1.4.3" : "1.4.4",
-          ),
+          recordArtifact(root, output, target, sha, "0.9.7", "123", "1.4.3"),
         ).toThrow("Invalid artifact producer")
         expect(existsSync(output)).toBe(false)
       } finally {
