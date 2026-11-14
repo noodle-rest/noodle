@@ -76,6 +76,14 @@ function releaseAsset(target: string) {
 }
 
 describe("release platforms", () => {
+  it("pins OpenTUI to glibc in standalone build commands", () => {
+    const compile = ci.jobs["platform-checks"].steps!.find((step) =>
+      step.run?.startsWith("bun build --compile"),
+    )!.run!
+    const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"))
+    for (const command of [compile, pkg.scripts["build:bin"]])
+      expect(command).toContain(`--define 'process.env.OPENTUI_LIBC="glibc"'`)
+  })
   it("uses Bun 1.4.4 for every platform and workflow", () => {
     for (const target of [
       "darwin-arm64",

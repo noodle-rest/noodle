@@ -79,7 +79,7 @@ jobs:
           NOODLE_TEST_WINDOWS_NATIVE: "1"
         run: bun test tests/integration/windowsCredentials.test.ts --timeout=30000
       - name: Compile standalone with shipped addon and worker assets
-        run: bun build --compile --entry-naming '[name].[ext]' src/app/cli.ts src/ui/editor/scriptDiagnostics.worker.ts --outfile "${{ matrix.asset }}"
+        run: bun build --compile --define 'process.env.OPENTUI_LIBC="glibc"' --entry-naming '[name].[ext]' src/app/cli.ts src/ui/editor/scriptDiagnostics.worker.ts --outfile "${{ matrix.asset }}"
       - name: Sign and verify macOS binary
         if: runner.os == 'macOS'
         run: bun scripts/sign-macos-binary.ts "./${{ matrix.asset }}"

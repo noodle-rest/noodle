@@ -17,6 +17,7 @@ Noodle 0.11.0 imports OpenAPI 3.1 documents, including FastAPI schemas, into edi
 
 ### 🐞 Fixes
 
+- Pin OpenTUI's Linux native library to glibc when compiling standalone binaries with Bun 1.4.4, avoiding resolution of unsupported musl packages during CI and local builds.
 - Reject unknown CLI options before scripts, HTTP, or report preparation, including misspelled flags that could otherwise trigger a real run.
 - Preserve request YAML comments and original bytes when loading or inspecting a collection instead of silently rewriting files to add a timeout.
 - Keep collection request order based on filenames rather than display names.
