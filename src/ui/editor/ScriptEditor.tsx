@@ -400,8 +400,8 @@ export function ScriptEditor({
       id="script-editor"
       flexDirection="column"
       flexGrow={1}
-      flexBasis={kind === "external" ? "auto" : 0}
-      flexShrink={kind === "external" ? 0 : 1}
+      flexBasis="auto"
+      flexShrink={0}
       minHeight={0}
       minWidth={0}
       overflow="hidden"

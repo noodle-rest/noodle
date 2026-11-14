@@ -6,6 +6,7 @@ class Noodle < Formula
   license "Apache-2.0"
 
   depends_on "bun" => :build
+  # CI checks Homebrew's current Zig against OpenTUI's exact build requirement.
   depends_on "zig" => :build
 
   on_linux do

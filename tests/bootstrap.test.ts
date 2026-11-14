@@ -43,6 +43,46 @@ describe("bootstrap", () => {
     ])
   })
 
+  it("waits for terminal cleanup before exiting", async () => {
+    const core = await import("@opentui/core")
+    const react = await import("@opentui/react")
+    const { createTestRenderer } = await import("@opentui/core/testing")
+    const { renderer } = await createTestRenderer({ width: 20, height: 6 })
+    const closed = Promise.withResolvers<void>()
+    const waiting = Promise.withResolvers<void>()
+    Object.defineProperty(renderer, "closed", {
+      get: () => {
+        waiting.resolve()
+        return closed.promise
+      },
+    })
+    const rendererSpy = spyOn(core, "createCliRenderer").mockResolvedValue(
+      renderer,
+    )
+    const rootSpy = spyOn(react, "createRoot").mockReturnValue({
+      render: () => {},
+    } as never)
+    const exitSpy = spyOn(process, "exit").mockImplementation(
+      (() => {}) as never,
+    )
+    try {
+      const { bootstrap } = await import("../src/app/main")
+      const startup = bootstrap({ collectionDir: tempDir() })
+      await waiting.promise
+      renderer.destroy()
+      expect(exitSpy).not.toHaveBeenCalled()
+      closed.resolve()
+      await startup
+      expect(exitSpy).toHaveBeenCalledWith(process.exitCode ?? 0)
+    } finally {
+      closed.resolve()
+      renderer.destroy()
+      rendererSpy.mockRestore()
+      rootSpy.mockRestore()
+      exitSpy.mockRestore()
+    }
+  })
+
   it("exits with error when env name not found", async () => {
     const tmpDir = tempDir()
     const exitSpy = spyOn(process, "exit").mockImplementation((() => {

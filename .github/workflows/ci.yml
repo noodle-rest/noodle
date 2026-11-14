@@ -113,10 +113,18 @@ jobs:
         run: bun scripts/build-response-file-native.ts --target=${{ matrix.target }}
       - name: Test independently rebuilt native downloads
         run: bun test tests/unit/responseFile.test.ts tests/unit/reportFile.test.ts tests/integration/binaryResponse.test.ts --timeout=30000
+      - name: Read Homebrew Zig version
+        if: runner.os != 'Windows'
+        id: homebrew-zig
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error https://formulae.brew.sh/api/formula/zig.json |
+            bun -e 'const { versions } = await Bun.stdin.json(); if (!/^\d+\.\d+\.\d+$/.test(versions.stable)) throw new Error("Invalid Homebrew Zig version"); console.log(`version=${versions.stable}`)' >> "$GITHUB_OUTPUT"
       - uses: mlugg/setup-zig@d1434d08867e3ee9daa34448df10607b98908d29 # v2
         if: runner.os != 'Windows'
         with:
-          version: 0.17.1
+          version: ${{ steps.homebrew-zig.outputs.version }}
       - name: Build Homebrew executable from archived source
         if: runner.os != 'Windows'
         run: |

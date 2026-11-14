@@ -131,7 +131,8 @@ try {
 
 `destroyTreeSitterClient()` removes the singleton and awaits worker termination. When the last renderer is destroyed,
 Core also calls `destroyTreeSitterClient()`, but it does not wait for the worker. Await `destroyTreeSitterClient()`
-yourself when shutdown must wait for the worker.
+yourself before destroying the last renderer when shutdown must wait for the worker. After automatic cleanup
+removes the singleton, a later call cannot await the worker termination already in progress.
 
 ### Per-client configuration
 

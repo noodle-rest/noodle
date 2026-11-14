@@ -341,6 +341,23 @@ async function mount({
 }
 
 describe("request script references", () => {
+  it("keeps the inline editor reachable in a 20 by 6 workspace", async () => {
+    const h = await mount({ width: 20, height: 6 })
+    const workspace = h.renderer.root.findDescendantById(
+      "script-workspace",
+    ) as ScrollBoxRenderable
+    const editor = h.editor()
+    expect(editor.height).toBeGreaterThanOrEqual(2)
+    await act(async () =>
+      workspace.scrollTo({ x: 0, y: workspace.scrollHeight }),
+    )
+    await h.frame()
+    expect(editor.y + editor.height).toBeLessThanOrEqual(
+      workspace.viewport.y + workspace.viewport.height,
+    )
+    expect(editor.y + editor.height).toBeGreaterThan(workspace.viewport.y)
+  })
+
   it.each(["pre", "post", "tests"] as const)(
     "keeps one scrollbar for an inherited inline %s editor while resizing",
     async (phase) => {

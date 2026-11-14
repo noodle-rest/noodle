@@ -190,7 +190,6 @@ export async function bootstrap(options: BootstrapOptions): Promise<void> {
   const renderer = await createCliRenderer({
     exitOnCtrlC: false,
     exitSignals: [],
-    onDestroy: () => process.exit(process.exitCode ?? 0),
   })
   renderer.addPostProcessFn(() => clipViewportCursor(renderer))
   const keymap = createNoodleKeymap(renderer)
@@ -263,4 +262,6 @@ export async function bootstrap(options: BootstrapOptions): Promise<void> {
       </RendererProvider>
     </KeymapProvider>,
   )
+  await renderer.closed
+  process.exit(process.exitCode ?? 0)
 }

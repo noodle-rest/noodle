@@ -81,14 +81,22 @@ it("keeps OpenAPI warnings visible and available after refreshing the current co
       parentDir: dir,
     })
     await act(async () => modal.importCollectionActions.confirm())
-    await waitForHookState(render, () =>
-      render!.captureCharFrame().includes("GET /pets"),
+    await waitForHookState(
+      render,
+      () => modal.overlays.activeOverlay === "notification",
+    )
+    await act(async () =>
+      render!.waitForFrame((frame) => frame.includes("GET /pets")),
     )
     expect(modal.overlays.activeOverlay).toBe("notification")
     expect(takeToastMessage()).toContain("parameters")
     await act(async () => host.press("escape"))
-    await waitForHookState(render, () =>
-      render!.captureCharFrame().includes("List pets"),
+    await waitForHookState(
+      render,
+      () => modal.selectedRequest?.name === "List pets",
+    )
+    await act(async () =>
+      render!.waitForFrame((frame) => frame.includes("List pets")),
     )
     expect(modal.overlays.notificationMessage).toBeNull()
   } finally {

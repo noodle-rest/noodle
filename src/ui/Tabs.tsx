@@ -28,9 +28,13 @@ export function Tabs({
   const theme = useTheme()
   const tabScrollRef = useRef<ScrollBoxRenderable | null>(null)
   const badgeScrollRef = useRef<ScrollBoxRenderable | null>(null)
+  const revealTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  )
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const hasJumpHint = tabs.some((t) => t.jumpHint)
   const scrollTabs = (delta: number) => {
+    clearTimeout(revealTimer.current)
     tabScrollRef.current?.scrollBy({ x: delta, y: 0 })
   }
 
@@ -57,7 +61,7 @@ export function Tabs({
   }, [hasJumpHint])
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    revealTimer.current = setTimeout(() => {
       const scrollbox = tabScrollRef.current
       const tab = scrollbox?.content.findDescendantById(`tab-${activeId}`)
       if (!scrollbox || !tab) return
@@ -73,7 +77,7 @@ export function Tabs({
             : 0
       if (delta !== 0) scrollbox.scrollBy({ x: delta, y: 0 })
     })
-    return () => clearTimeout(timer)
+    return () => clearTimeout(revealTimer.current)
   }, [activeId])
 
   return (

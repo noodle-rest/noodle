@@ -58,6 +58,12 @@ When changing the locked OpenTUI version, update the formula's checksummed
 resource and verify its Zig toolchain requirements. Never pair a new resource
 with an older release archive or replace immutable release assets.
 
+Homebrew currently supplies Zig 0.17.1; there is no patch-pinned Zig formula.
+CI uses Homebrew's current Zig version for the source build so a toolchain
+advance fails the exact-version check. When Homebrew advances Zig, update the
+locked OpenTUI packages, checksummed source resource, and build requirement
+together before publishing a compatible formula.
+
 Bun dependencies are fetched before installation into `buildpath/bun-cache`;
 `build:homebrew --offline` uses that prepared cache. Native dependencies are
 rebuilt from source, while JavaScript and WASM dependencies remain locked.

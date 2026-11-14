@@ -490,8 +490,9 @@ describe("images beneath modal backdrops", () => {
         expect(setup.image()).toBe(retained)
         expect(retained.image).toBe(original)
         expect(original.raw().data).toEqual(originalPixels)
-        placements.length = 0
         await act(async () => setup.modal(false))
+        await act(async () => setup.flush())
+        placements.length = 0
         await act(async () => setup.renderOnce())
         expect(placements).toHaveLength(1)
         expect(placements[0]!.image).toBe(original)
