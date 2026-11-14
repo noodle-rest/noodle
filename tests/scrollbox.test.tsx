@@ -124,14 +124,14 @@ function expectThemedScrollbar(root: Renderable, id: string, visible: boolean) {
   const scrollbar = (scrollbox as ScrollBoxRenderable).verticalScrollBar
   expect(scrollbar.visible).toBe(visible)
   expect(
-    scrollbar.slider.backgroundColor.equals(
-      RGBA.fromHex(THEMES[0]!.background),
-    ),
+    scrollbar
+      ._native()
+      .backgroundColor.equals(RGBA.fromHex(THEMES[0]!.background)),
   ).toBe(true)
   expect(
-    scrollbar.slider.foregroundColor.equals(
-      RGBA.fromHex(THEMES[0]!.borderActive),
-    ),
+    scrollbar
+      ._native()
+      .foregroundColor.equals(RGBA.fromHex(THEMES[0]!.borderActive)),
   ).toBe(true)
 }
 
@@ -1672,7 +1672,7 @@ describe("RequestPane scrollbox", () => {
     expect(headerLines.length).toBeLessThan(30)
 
     // scroll indicator present (proves overflow rendering)
-    expect(frame).toMatch(/[▀▄▌]/)
+    expect(frame).toMatch(/[█▀▄▌]/)
     expectThemedScrollbar(renderer.root, "request-tab-scrollbox", true)
   })
 

@@ -13,6 +13,11 @@ import {
   charOffsetToDisplayOffset,
 } from "./highlightOffsets"
 
+const variableStyles = new WeakMap<
+  InputRenderable | TextareaRenderable,
+  SyntaxStyle
+>()
+
 export function highlightVariables(
   input: InputRenderable | TextareaRenderable,
   value: string,
@@ -21,15 +26,22 @@ export function highlightVariables(
   pathParams?: ParamEntry[],
   body?: BodyCompletion,
 ): void {
-  const style = SyntaxStyle.fromStyles({
-    "env.resolved": { fg: theme.primary },
-    "env.missing": { fg: theme.error },
-    "path.resolved": { fg: theme.primary },
-    "path.missing": { fg: theme.error },
-  })
+  let style = variableStyles.get(input)
+  if (!style) {
+    style = SyntaxStyle.create(input.ctx.nativeScene)
+    variableStyles.set(input, style)
+    input.once("destroyed", () => variableStyles.get(input)?.destroy())
+  }
+  for (const [name, fg] of Object.entries({
+    "env.resolved": theme.primary,
+    "env.missing": theme.error,
+    "path.resolved": theme.primary,
+    "path.missing": theme.error,
+  }))
+    style.registerStyle(name, { fg })
   input.clearAllHighlights()
   input.syntaxStyle = style
-  const displayOffsets = buildCharToDisplayOffsets(value)
+  const displayOffsets = buildCharToDisplayOffsets(value, input.ctx.widthMethod)
 
   for (const highlight of getVariableHighlights(value, env, body)) {
     input.addHighlightByCharRange({

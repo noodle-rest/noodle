@@ -59,9 +59,9 @@ describe("request row mouse controls", () => {
     )
     await renderOnce()
 
-    await mockMouse.click(8, 0, MouseButtons.LEFT)
-    await mockMouse.click(60, 0, MouseButtons.LEFT)
-    await mockMouse.click(1, 0, MouseButtons.LEFT)
+    await act(async () => mockMouse.click(8, 0, MouseButtons.LEFT))
+    await act(async () => mockMouse.click(60, 0, MouseButtons.LEFT))
+    await act(async () => mockMouse.click(1, 0, MouseButtons.LEFT))
 
     expect(activations).toEqual([
       [0, false, "key"],
@@ -121,11 +121,11 @@ describe("request row mouse controls", () => {
     expect(frame).not.toContain("Extract response values")
     expect(frame).not.toContain("←")
 
-    await mockMouse.click(1, 0, MouseButtons.LEFT)
-    await mockMouse.click(8, 0, MouseButtons.LEFT)
-    await mockMouse.click(60, 0, MouseButtons.LEFT)
-    await mockMouse.click(8, 1, MouseButtons.LEFT)
-    await mockMouse.click(60, 1, MouseButtons.LEFT)
+    await act(async () => mockMouse.click(1, 0, MouseButtons.LEFT))
+    await act(async () => mockMouse.click(8, 0, MouseButtons.LEFT))
+    await act(async () => mockMouse.click(60, 0, MouseButtons.LEFT))
+    await act(async () => mockMouse.click(8, 1, MouseButtons.LEFT))
+    await act(async () => mockMouse.click(60, 1, MouseButtons.LEFT))
     await act(async () => {
       await mockMouse.click(72, 0, MouseButtons.LEFT)
       mockInput.pressEscape()
@@ -238,6 +238,7 @@ describe("request row mouse controls", () => {
       )
       await render.renderOnce()
       await act(async () => render.renderOnce())
+      await act(async () => render.flush())
       const frame = render.captureCharFrame()
       expect(frame).toContain("sessionKey")
       const position = findTextPosition(frame, "sessionKey")
@@ -403,9 +404,9 @@ describe("request row mouse controls", () => {
     )
     await renderOnce()
 
-    await mockMouse.click(8, 0, MouseButtons.LEFT)
-    await mockMouse.click(60, 0, MouseButtons.LEFT)
-    await mockMouse.click(1, 0, MouseButtons.LEFT)
+    await act(async () => mockMouse.click(8, 0, MouseButtons.LEFT))
+    await act(async () => mockMouse.click(60, 0, MouseButtons.LEFT))
+    await act(async () => mockMouse.click(1, 0, MouseButtons.LEFT))
 
     expect(activations).toEqual([
       [0, false, "key"],
@@ -439,7 +440,7 @@ describe("request row mouse controls", () => {
     )
     await renderOnce()
 
-    await mockMouse.moveTo(8, 0)
+    await act(async () => mockMouse.moveTo(8, 0))
     await renderOnce()
 
     const elementColor = RGBA.fromHex(THEMES[0]!.backgroundElement)
@@ -490,7 +491,7 @@ describe("request row mouse controls", () => {
     )
     await renderOnce()
 
-    await mockMouse.click(60, 0, MouseButtons.LEFT)
+    await act(async () => mockMouse.click(60, 0, MouseButtons.LEFT))
     expect(focused).toEqual(["value"])
   })
 
@@ -519,7 +520,7 @@ describe("request row mouse controls", () => {
     )
     await renderOnce()
 
-    await mockMouse.click(60, 0, MouseButtons.LEFT)
+    await act(async () => mockMouse.click(60, 0, MouseButtons.LEFT))
     expect(activations).toEqual([[-1, true, "value"]])
   })
 
@@ -556,7 +557,7 @@ describe("request row mouse controls", () => {
     )
     await renderOnce()
 
-    await mockMouse.click(8, 0, MouseButtons.LEFT)
+    await act(async () => mockMouse.click(8, 0, MouseButtons.LEFT))
     expect(activations).toEqual([])
   })
 })

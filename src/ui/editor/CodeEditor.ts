@@ -132,6 +132,10 @@ export class CodeEditorRenderable extends TextareaRenderable {
       options.theme,
       options.extraHighlights,
       {
+        owner: ctx.nativeScene,
+        get widthMethod() {
+          return ctx.widthMethod
+        },
         clear: () => this.clearAllHighlights(),
         setStyle: (style) => {
           this.syntaxStyle = style
@@ -662,8 +666,10 @@ export class CodeEditorRenderable extends TextareaRenderable {
   }
 
   override destroy(): void {
+    if (this.isDestroyed) return
     if (this._highlightTimer) clearTimeout(this._highlightTimer)
     if (this._readonlyHighlightTimer) clearTimeout(this._readonlyHighlightTimer)
+    this._highlights.destroy()
     super.destroy()
   }
 
@@ -784,7 +790,7 @@ export class CodeEditorRenderable extends TextareaRenderable {
     try {
       this.cacheDisplayedText(text)
       this.editBuffer.setText(text)
-      this.yogaNode.markDirty()
+      this.invalidateIntrinsicSize()
       this.clearReadonlyHighlights()
     } finally {
       this._suppressContentChanged = false
@@ -899,7 +905,11 @@ export class CodeEditorRenderable extends TextareaRenderable {
           : this._displayedText.length
       if (end - start > 100_000) continue
       const text = this._displayedText.slice(start, end)
-      for (const token of highlightJsonTokens(text, this._theme)) {
+      for (const token of highlightJsonTokens(
+        text,
+        this._theme,
+        this.ctx.widthMethod,
+      )) {
         this.addHighlight(line, {
           start: token.displayOffset,
           end: token.displayEnd,

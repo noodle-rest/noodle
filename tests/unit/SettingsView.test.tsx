@@ -346,6 +346,7 @@ describe("SettingsView", () => {
     )
     await renderOnce()
     await act(async () => host.press("down"))
+    await renderOnce()
     expect(captureCharFrame()).toContain("Confirm undo all")
     expect(captureCharFrame()).toContain("No supported editors found")
     cleanup()
@@ -396,6 +397,7 @@ describe("SettingsView", () => {
     )
     await renderOnce()
     await act(async () => host.press("right"))
+    await renderOnce()
     expect(captureCharFrame()).toContain("Active environment")
     expect(captureCharFrame()).toContain("Describe this collection")
     expect(captureCharFrame()).toContain("history.")
@@ -452,6 +454,7 @@ describe("SettingsView", () => {
     await h.renderOnce()
     await act(async () => h.mockInput.typeText("xx"))
     expect(patches).toEqual([])
+    await h.renderOnce()
     expect(h.captureCharFrame()).toContain("xx")
     dispose()
     cleanup()
@@ -1076,7 +1079,7 @@ describe("SettingsView", () => {
     await act(async () => host.press("g", { ctrl: true }))
     await renderOnce()
 
-    expect(captureCharFrame()).toContain("That key cannot be assigned")
+    expect(captureCharFrame()).toMatch(/That key cannot be[\s│]+assigned/)
     cleanup()
   })
 

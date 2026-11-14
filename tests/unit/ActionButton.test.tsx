@@ -39,6 +39,7 @@ describe("ActionButton", () => {
       await renderOnce()
     })
 
+    await renderOnce()
     const hoverColor = RGBA.fromHex(contrastOnSecondary(theme))
     expect(shortcut()?.fg.equals(hoverColor)).toBe(true)
     expect(label()?.fg.equals(hoverColor)).toBe(true)

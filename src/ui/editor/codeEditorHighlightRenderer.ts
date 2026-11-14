@@ -1,9 +1,11 @@
 import { buildJavascriptHighlightRanges } from "./javascriptSyntax"
 import type {
   Highlight,
+  NativeResourceOwner,
   SimpleHighlight,
   SyntaxStyle,
   TreeSitterClient,
+  WidthMethod,
 } from "@opentui/core"
 import type { Theme } from "../theme-data"
 import {
@@ -21,8 +23,10 @@ import {
 import type { JsonToken } from "./syntax"
 
 interface HighlightHost {
+  owner: NativeResourceOwner
+  widthMethod: WidthMethod
   clear: () => void
-  setStyle: (style: SyntaxStyle) => void
+  setStyle: (style: SyntaxStyle | null) => void
   applyRanges: (ranges: EditorHighlightRange[]) => void
 }
 
@@ -43,7 +47,7 @@ export class CodeEditorHighlightRenderer {
   ) {
     this._extra = extra
     this._theme = theme
-    this._style = createCodeEditorSyntaxStyle(theme)
+    this._style = createCodeEditorSyntaxStyle(theme, this.host.owner)
     this.updateEnvStyleIds()
   }
 
@@ -61,8 +65,16 @@ export class CodeEditorHighlightRenderer {
 
   setTheme(theme: Theme): void {
     this._theme = theme
-    this._style = createCodeEditorSyntaxStyle(theme)
+    const previous = this._style
+    this._style = createCodeEditorSyntaxStyle(theme, this.host.owner)
+    this.host.setStyle(this._style)
+    previous.destroy()
     this.updateEnvStyleIds()
+  }
+
+  destroy(): void {
+    this.host.setStyle(null)
+    this._style.destroy()
   }
 
   setExtra(extra: ((content: string) => Highlight[]) | undefined): void {
@@ -101,6 +113,7 @@ export class CodeEditorHighlightRenderer {
         this._treeSitterHighlights,
         content,
         this._style,
+        this.host.widthMethod,
       ),
     )
     this.applyExtra(content)
@@ -169,14 +182,25 @@ export class CodeEditorHighlightRenderer {
   private applyJavascript(content: string): void {
     this.host.clear()
     this.host.setStyle(this._style)
-    this.host.applyRanges(buildJavascriptHighlightRanges(content, this._style))
+    this.host.applyRanges(
+      buildJavascriptHighlightRanges(
+        content,
+        this._style,
+        this.host.widthMethod,
+      ),
+    )
   }
 
   private applyJson(content: string): void {
     this.host.clear()
     this.host.setStyle(this._style)
     this.host.applyRanges(
-      buildJsonHighlightRanges(content, this._theme, this._style),
+      buildJsonHighlightRanges(
+        content,
+        this._theme,
+        this._style,
+        this.host.widthMethod,
+      ),
     )
   }
 
@@ -184,7 +208,12 @@ export class CodeEditorHighlightRenderer {
     this.host.clear()
     this.host.setStyle(this._style)
     this.host.applyRanges(
-      buildYamlHighlightRanges(content, this._theme, this._style),
+      buildYamlHighlightRanges(
+        content,
+        this._theme,
+        this._style,
+        this.host.widthMethod,
+      ),
     )
   }
 
@@ -192,7 +221,11 @@ export class CodeEditorHighlightRenderer {
     if (!this._extra) return
     try {
       this.host.applyRanges(
-        buildExtraHighlightRanges(content, this._extra(content)),
+        buildExtraHighlightRanges(
+          content,
+          this._extra(content),
+          this.host.widthMethod,
+        ),
       )
     } catch {
       // Extra highlighters may reject malformed source while editing.

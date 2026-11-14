@@ -1,6 +1,7 @@
 import { extend } from "@opentui/react"
 import {
   TextBufferRenderable,
+  type NativeRenderableIntegration,
   type RenderContext,
   type RenderableOptions,
   type SyntaxStyle,
@@ -47,6 +48,11 @@ export interface JsonBodyOptions extends RenderableOptions<JsonBodyRenderable> {
 }
 
 export class JsonBodyRenderable extends TextBufferRenderable {
+  static override readonly nativeIntegration: NativeRenderableIntegration = {
+    ...TextBufferRenderable.nativeIntegration,
+    kind: "text_view",
+  }
+
   private _body: string
   private _theme: Theme
   private _activeEnv?: Environment | null
@@ -61,18 +67,22 @@ export class JsonBodyRenderable extends TextBufferRenderable {
   private _highlightPriority: "start" | "end"
 
   constructor(ctx: RenderContext, options: JsonBodyOptions) {
-    super(ctx, {
-      fg: options.theme.text,
-      bg: options.backgroundColor ?? options.theme.backgroundPanel,
-      wrapMode: "char",
-      selectable: true,
-    })
+    super(
+      ctx,
+      {
+        fg: options.theme.text,
+        bg: options.backgroundColor ?? options.theme.backgroundPanel,
+        wrapMode: "char",
+        selectable: true,
+      },
+      true,
+    )
     this._body = options.body
     this._theme = options.theme
     this._activeEnv = options.activeEnv
     this._backgroundColor = options.backgroundColor
     this._highlightPriority = options.highlightPriority ?? "start"
-    this._syntaxStyle = createJsonSyntaxStyle(options.theme)
+    this._syntaxStyle = createJsonSyntaxStyle(options.theme, ctx.nativeScene)
     this.textBuffer.setSyntaxStyle(this._syntaxStyle)
     this.renderBody()
   }
@@ -88,7 +98,7 @@ export class JsonBodyRenderable extends TextBufferRenderable {
     this._theme = value
     this.textBuffer.setSyntaxStyle(null)
     this._syntaxStyle.destroy()
-    this._syntaxStyle = createJsonSyntaxStyle(value)
+    this._syntaxStyle = createJsonSyntaxStyle(value, this.ctx.nativeScene)
     this.textBuffer.setSyntaxStyle(this._syntaxStyle)
     this.fg = value.text
     this.bg = this._backgroundColor ?? value.backgroundPanel
@@ -145,7 +155,11 @@ export class JsonBodyRenderable extends TextBufferRenderable {
   }
 
   private buildHighlightJobs(): HighlightJob[] {
-    const tokens = highlightJsonTokens(this._body, this._theme)
+    const tokens = highlightJsonTokens(
+      this._body,
+      this._theme,
+      this.ctx.widthMethod,
+    )
     const jobs = tokens.map((token) => ({
       start: token.displayOffset,
       end: token.displayEnd,
@@ -155,7 +169,10 @@ export class JsonBodyRenderable extends TextBufferRenderable {
 
     if (!this._activeEnv) return jobs
 
-    const displayOffsets = buildCharToDisplayOffsets(this._body)
+    const displayOffsets = buildCharToDisplayOffsets(
+      this._body,
+      this.ctx.widthMethod,
+    )
     let tokenIndex = 0
     for (const reference of variableReferences(this._body)) {
       while (

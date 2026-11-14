@@ -400,7 +400,8 @@ export function ScriptEditor({
       id="script-editor"
       flexDirection="column"
       flexGrow={1}
-      flexBasis={0}
+      flexBasis="auto"
+      flexShrink={0}
       minHeight={0}
       minWidth={0}
       overflow="hidden"

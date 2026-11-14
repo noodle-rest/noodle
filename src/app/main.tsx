@@ -1,4 +1,5 @@
 import { createCliRenderer } from "@opentui/core"
+import { clipViewportCursor } from "../ui/viewportCursor"
 import { createRoot, extend } from "@opentui/react"
 import { addDefaultParsers } from "@opentui/core"
 import { KeymapProvider } from "@opentui/keymap/react"
@@ -189,8 +190,8 @@ export async function bootstrap(options: BootstrapOptions): Promise<void> {
   const renderer = await createCliRenderer({
     exitOnCtrlC: false,
     exitSignals: [],
-    onDestroy: () => process.exit(process.exitCode ?? 0),
   })
+  renderer.addPostProcessFn(() => clipViewportCursor(renderer))
   const keymap = createNoodleKeymap(renderer)
   let shuttingDown = false
   const shutdown = () => {
@@ -261,4 +262,6 @@ export async function bootstrap(options: BootstrapOptions): Promise<void> {
       </RendererProvider>
     </KeymapProvider>,
   )
+  await renderer.closed
+  process.exit(process.exitCode ?? 0)
 }

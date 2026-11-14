@@ -18,6 +18,7 @@ export class PaneSplitRenderable extends BoxRenderable {
     super(ctx, options)
     this.ratio = options.splitRatio ?? 0.5
     this.expanded = options.panesExpanded ?? false
+    this.onLifecyclePass = () => this.updatePaneSizes()
   }
 
   set splitRatio(value: number) {
@@ -30,7 +31,7 @@ export class PaneSplitRenderable extends BoxRenderable {
     this.requestRender()
   }
 
-  override onLifecyclePass = (): void => {
+  private updatePaneSizes(): void {
     if (this.expanded) return
     const request = this.getChildren().find(
       (child) => child.id === "request-pane-slot",

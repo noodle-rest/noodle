@@ -209,14 +209,14 @@ describe("TimelineTab", () => {
     const scrollbar = (scrollbox as ScrollBoxRenderable).verticalScrollBar
     expect(scrollbar.visible).toBe(true)
     expect(
-      scrollbar.slider.backgroundColor.equals(
-        RGBA.fromHex(THEMES[0]!.background),
-      ),
+      scrollbar
+        ._native()
+        .backgroundColor.equals(RGBA.fromHex(THEMES[0]!.background)),
     ).toBe(true)
     expect(
-      scrollbar.slider.foregroundColor.equals(
-        RGBA.fromHex(THEMES[0]!.borderActive),
-      ),
+      scrollbar
+        ._native()
+        .foregroundColor.equals(RGBA.fromHex(THEMES[0]!.borderActive)),
     ).toBe(true)
     cleanup()
   })

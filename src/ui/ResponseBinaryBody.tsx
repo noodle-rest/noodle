@@ -47,24 +47,21 @@ export class ResponseImageRenderable extends ImageRenderable {
     this.failed = true
     this.onError?.(error)
   }
-  override render(buffer: OptimizedBuffer, deltaTime: number): void {
+  protected override renderSelf(buffer: OptimizedBuffer): void {
     // OpenTUI clamps exposed dimensions to one cell, even for zero Yoga space.
     if (
       this.failed ||
-      this.yogaNode.getComputedWidth() <= 0 ||
-      this.yogaNode.getComputedHeight() <= 0
+      this.getLayout().width <= 0 ||
+      this.getLayout().height <= 0
     )
       return
     try {
-      super.render(buffer, deltaTime)
+      if (this.modalRoot && mountedModalBackdrop(this.modalRoot)) return
+      this.composition.dispose()
+      super.renderSelf(buffer)
     } catch (error) {
       this.previewFailed(error)
     }
-  }
-  protected override renderSelf(buffer: OptimizedBuffer): void {
-    if (this.modalRoot && mountedModalBackdrop(this.modalRoot)) return
-    this.composition.dispose()
-    super.renderSelf(buffer)
   }
   paintUnderModal(buffer: OptimizedBuffer) {
     if (
@@ -73,8 +70,8 @@ export class ResponseImageRenderable extends ImageRenderable {
       this.isDestroyed ||
       !this.image ||
       !this.modalRoot ||
-      this.yogaNode.getComputedWidth() <= 0 ||
-      this.yogaNode.getComputedHeight() <= 0
+      this.getLayout().width <= 0 ||
+      this.getLayout().height <= 0
     )
       return
     for (let ancestor = this.parent; ancestor; ancestor = ancestor.parent) {

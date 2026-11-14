@@ -198,6 +198,7 @@ export function RequestScriptTab({ request, onFocus, ...props }: Props) {
         flexGrow={1}
         flexBasis={0}
         minHeight={0}
+        contentOptions={{ minHeight: "100%" }}
       >
         {showAdd ? (
           <box flexDirection="column" flexShrink={0} gap={1}>
@@ -214,16 +215,7 @@ export function RequestScriptTab({ request, onFocus, ...props }: Props) {
             />
           </box>
         ) : (
-          <box
-            height={Math.max(
-              isExternalScriptSource(value) ? 9 : 10,
-              size.height,
-            )}
-            flexDirection="column"
-            flexShrink={0}
-          >
-            {editor}
-          </box>
+          editor
         )}
       </scrollbox>
     </box>

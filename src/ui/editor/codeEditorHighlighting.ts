@@ -1,4 +1,9 @@
-import type { Highlight, SimpleHighlight, SyntaxStyle } from "@opentui/core"
+import type {
+  Highlight,
+  SimpleHighlight,
+  SyntaxStyle,
+  WidthMethod,
+} from "@opentui/core"
 import type { Theme } from "../theme-data"
 import {
   buildCharToDisplayOffsets,
@@ -22,8 +27,9 @@ export function buildTreeSitterHighlightRanges(
   highlights: SimpleHighlight[],
   content: string,
   style: SyntaxStyle,
+  widthMethod: WidthMethod = "unicode",
 ): EditorHighlightRange[] {
-  const displayOffsets = buildCharToDisplayOffsets(content)
+  const displayOffsets = buildCharToDisplayOffsets(content, widthMethod)
   return highlights.flatMap(([start, end, group]) => {
     if (start >= end) return []
     const styleId = style.getStyleId(group)
@@ -43,8 +49,9 @@ export function buildJsonHighlightRanges(
   content: string,
   theme: Theme,
   style: SyntaxStyle,
+  widthMethod: WidthMethod = "unicode",
 ): EditorHighlightRange[] {
-  return highlightJsonTokens(content, theme).map((token) => ({
+  return highlightJsonTokens(content, theme, widthMethod).map((token) => ({
     start: token.displayOffset,
     end: token.displayEnd,
     styleId: styleIdForJsonToken(token.kind, token.fg, theme, style),
@@ -56,9 +63,10 @@ export function buildYamlHighlightRanges(
   content: string,
   theme: Theme,
   style: SyntaxStyle,
+  widthMethod: WidthMethod = "unicode",
 ): EditorHighlightRange[] {
   const ranges: EditorHighlightRange[] = []
-  const displayOffsets = buildCharToDisplayOffsets(content)
+  const displayOffsets = buildCharToDisplayOffsets(content, widthMethod)
   let sourceOffset = 0
 
   for (const line of content.split("\n")) {
@@ -89,8 +97,9 @@ export function buildYamlHighlightRanges(
 export function buildExtraHighlightRanges(
   content: string,
   highlights: Highlight[],
+  widthMethod: WidthMethod = "unicode",
 ): EditorHighlightRange[] {
-  const displayOffsets = buildCharToDisplayOffsets(content)
+  const displayOffsets = buildCharToDisplayOffsets(content, widthMethod)
   return highlights.map((highlight) => ({
     start: charOffsetToDisplayOffset(displayOffsets, highlight.start),
     end: charOffsetToDisplayOffset(displayOffsets, highlight.end),

@@ -44,19 +44,25 @@ source-build aid, not an automatic publisher.
 
 ## Native source builds
 
-`bun run build:homebrew --opentui-source <extracted-opentui-source> --zig <zig-0.16.0> --cc <host-compiler>`
+`bun run build:homebrew --opentui-source <extracted-opentui-source> --zig <zig-0.17.1> --cc <host-compiler>`
 installs the frozen dependency set, rebuilds both native assets, checks the
 embedded asset set, signs on macOS, and tests compiled QuickJS. Run this in an
 extracted Noodle source tree: it replaces the host addon and installed OpenTUI
 library in that tree. Linux builds target glibc. The normal cross-platform
 release builder remains separate.
 
-The released v0.9.8 formula, development template, and Unix CI pin OpenTUI
-v0.5.14, matching the exact package dependencies, with SHA-256
-`0e092b7405934c3a30f6eca2cb6e35eb00d9d8948d15daa69af2371e1e641a6e`.
+The development template and Unix CI pin OpenTUI
+v0.9.0, matching the exact package dependencies, with SHA-256
+`d341c779acf0ee265500fdddf74ab6704b95715dd918d0c019d0749a5b30be40`.
 When changing the locked OpenTUI version, update the formula's checksummed
 resource and verify its Zig toolchain requirements. Never pair a new resource
 with an older release archive or replace immutable release assets.
+
+Homebrew currently supplies Zig 0.17.1; there is no patch-pinned Zig formula.
+CI uses Homebrew's current Zig version for the source build so a toolchain
+advance fails the exact-version check. When Homebrew advances Zig, update the
+locked OpenTUI packages, checksummed source resource, and build requirement
+together before publishing a compatible formula.
 
 Bun dependencies are fetched before installation into `buildpath/bun-cache`;
 `build:homebrew --offline` uses that prepared cache. Native dependencies are

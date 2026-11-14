@@ -6,6 +6,7 @@ import type {
 } from "@opentui/core/testing"
 import { testRender as openTuiTestRender } from "@opentui/react/test-utils"
 import { act, type ReactNode } from "react"
+import { clipViewportCursor } from "../src/ui/viewportCursor"
 
 const actEnvironment = globalThis as typeof globalThis & {
   IS_REACT_ACT_ENVIRONMENT?: boolean
@@ -36,6 +37,15 @@ export function createTestRender() {
     options: TestRendererOptions,
   ): Promise<TestRendererSetup> {
     const setup = await openTuiTestRender(node, options)
+    setup.renderer.addPostProcessFn(() => clipViewportCursor(setup.renderer))
+    const renderOnce = setup.renderOnce
+    setup.renderOnce = async () => {
+      await act(renderOnce)
+    }
+    const flush = setup.flush
+    setup.flush = async (options) => {
+      await act(() => flush(options))
+    }
     const destroy = setup.renderer.destroy.bind(setup.renderer)
     setup.renderer.destroy = () => {
       destroy()

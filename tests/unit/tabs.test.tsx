@@ -96,10 +96,10 @@ describe("Tabs", () => {
     )
     await renderOnce()
 
-    await mockMouse.click(9, 0, MouseButtons.RIGHT)
+    await act(async () => mockMouse.click(9, 0, MouseButtons.RIGHT))
     expect(selected).toBe("")
 
-    await mockMouse.click(9, 0, MouseButtons.LEFT)
+    await act(async () => mockMouse.click(9, 0, MouseButtons.LEFT))
     expect(selected).toBe("b")
   })
 

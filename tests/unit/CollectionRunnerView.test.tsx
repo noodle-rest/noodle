@@ -649,7 +649,7 @@ describe("CollectionRunnerView", () => {
       renderedResultLines[0]!.indexOf("ms"),
     ])
     expect(renderedResultLines[0]!.indexOf("ms") + "ms".length).toBe(
-      first.screenX + first.width,
+      first.screenX + first.width - 1,
     )
     const postSpan = render
       .captureSpans()
