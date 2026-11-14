@@ -65,9 +65,10 @@ describe("bootstrap", () => {
     const exitSpy = spyOn(process, "exit").mockImplementation(
       (() => {}) as never,
     )
+    let startup: Promise<void> | undefined
     try {
       const { bootstrap } = await import("../src/app/main")
-      const startup = bootstrap({ collectionDir: tempDir() })
+      startup = bootstrap({ collectionDir: tempDir() })
       await waiting.promise
       renderer.destroy()
       expect(exitSpy).not.toHaveBeenCalled()
@@ -76,10 +77,14 @@ describe("bootstrap", () => {
       expect(exitSpy).toHaveBeenCalledWith(process.exitCode ?? 0)
     } finally {
       closed.resolve()
-      renderer.destroy()
-      rendererSpy.mockRestore()
-      rootSpy.mockRestore()
-      exitSpy.mockRestore()
+      try {
+        await startup?.catch(() => {})
+      } finally {
+        renderer.destroy()
+        rendererSpy.mockRestore()
+        rootSpy.mockRestore()
+        exitSpy.mockRestore()
+      }
     }
   })
 
