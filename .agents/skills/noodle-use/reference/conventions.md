@@ -7,6 +7,7 @@ Naming, structure, and behavioral conventions for noodle collections.
 - **Display name** (`name` field): Human-readable. Use title case. Examples: `Get Users`, `Create Post`, `Delete Comment`.
 - **File name** (determines ID): Lowercase, hyphen-separated. Match the HTTP method and resource. Examples: `get-users.yml`, `create-post.yml`, `delete-comment.yml`.
 - **ID** = relative path minus `.yml`. File at `auth/login.yml` becomes ID `"auth/login"`. Keep forward slashes on Windows.
+- **Reserved request names**: Do not use `settings.yml` or `folder.yml` as request basenames, in any letter case or folder. Those filenames belong to collection and folder metadata.
 - **Windows names**: Request, folder, collection, and environment names reject `< > : " / \ | ? *`, control characters, trailing dots/spaces, and reserved device names such as `CON`, `NUL`, `COM1`, or `LPT1`, including names with extensions.
 
 Good file names:

@@ -40,6 +40,8 @@ my-collection/
 6. **Requests** — read `.yml` files (skip `settings.yml` and `folder.yml`); parse with `lang.parseRequest(id, yaml)`
 7. **Sort** — folders by `seq` then name, requests alphabetically; folders always before requests
 
+Loading preserves original request bytes, including comments and omitted timeout fields. Bootstrap and new imports add `/.noodle/` and `/.timeline/` to the collection `.gitignore` without replacing unrelated rules. Request saves reject `settings` and `folder` basenames case-insensitively; CLI request creation is exclusive.
+
 ### Request ID convention
 
 Request IDs are their **relative path from collection root, minus the `.yml` extension**. A file at `auth/login.yml` gets ID `"auth/login"`. This ID is used for:
@@ -545,6 +547,8 @@ createMain(main) — citty argparse
               ├── optional --json result envelope via commandResult.ts
               └── collection/request run resolves targets, --env, proxy/TLS vault data, assertions, then settings.yml
 ```
+
+`collection run --dry-run` uses `previewCollectionRun()` and the same `prepareCollectionRun()` selection, hook resolution, and dataset validation as execution. It returns the environment name, one iteration's ordered request/stage sequence, iteration count, and total planned top-level executions. It does not load environment values, external scripts, cookies, or network policies, and never runs scripts or HTTP. `--output` and `--reporter` are rejected; redirect stdout to save a plan.
 
 ### TUI path classification
 

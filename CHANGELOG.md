@@ -4,6 +4,41 @@ All notable changes to Noodle are documented in this file.
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-14
+
+Noodle 0.11.0 imports OpenAPI 3.1 documents, including FastAPI schemas, into editable collections. Preview a collection run's selected requests, hooks, and iteration counts with `--dry-run` before sending anything. This release also protects local collection data and updates the terminal renderer with fixes for highlighting, scrolling, and shutdown.
+
+[Read the full release article.](https://noodlerest.dev/blog/noodle-0-11-0-openapi-3-1-and-run-previews/)
+
+### ✨ Features
+
+- Import OpenAPI 3.1 JSON or YAML alongside 3.0, resolve local JSON Pointers, and use body examples or editable JSON templates derived from schemas. Documents without servers get a default environment with an empty `base_url`. Review operation and field warnings for unsupported references, schema constructs, security requirements, callbacks, and webhooks; at least one supported outgoing path operation is required. OpenAPI export remains 3.0.3.
+- Preview `collection run` with `--dry-run`, including target and tag selection, setup/teardown order, the environment name, dataset iterations, and total planned top-level executions. Validate selection and data without reading environment values or external scripts, running scripts, opening cookie jars, or sending HTTP. Add `--json` for a structured plan; redirect stdout to save it because `--output` and `--reporter` are incompatible with previews.
+
+### 🐞 Fixes
+
+- Reject unknown CLI options before scripts, HTTP, or report preparation, including misspelled flags that could otherwise trigger a real run.
+- Preserve request YAML comments and original bytes when loading or inspecting a collection instead of silently rewriting files to add a timeout.
+- Keep collection request order based on filenames rather than display names.
+- Reject `settings.yml` and `folder.yml` request basenames, case-insensitively, and create CLI requests without overwriting a competing file.
+- Add local `.noodle/` and `.timeline/` ignore rules when creating, initializing, or importing a new collection while preserving existing rules.
+- Stage imports into existing collections before publication and restore original files after failures without overwriting concurrent edits. Retain backups when rollback cannot safely finish, report temporary-directory cleanup failures as warnings after a successful import, and show import warnings in a scrollable TUI notification.
+- Include script, capture, assertion, and test failures in recorded manual-send success and folder activity rates, even when HTTP succeeds.
+- Compile inline and external scripts/tests during collection audits without executing them.
+- Restore terminal shutdown, JSON response rendering, syntax and variable highlighting, image previews under overlays, tab scrolling, and cursor clipping after the OpenTUI upgrade.
+
+### 🔧 Refactors
+
+- Upgrade OpenTUI to 0.9.0 and refresh runtime and development dependencies. Align the checksummed Homebrew source resource with the installed OpenTUI version and validate source builds against Homebrew's current Zig version.
+- Move distribution, update, and release-site synchronization URLs to the `noodle-rest` organization while keeping the existing update manifest and checksum contract.
+
+### 📚 Documentation
+
+- Update `noodle-dev` for OpenAPI 3.1 imports, shared collection-run previews, read-only loading, reserved request basenames, and collection-local ignore rules.
+- Update `noodle-use` for OpenAPI 3.1, dry-run plans, collection setup and naming safeguards, auth inheritance and redirect-check limits, and current setup-action examples.
+- Refresh `opentui` references for the native rendering APIs, lifecycle, framework bindings, and version-specific release guidance used by OpenTUI 0.9.0.
+- Synchronize the README, agent instructions, CLI and agent guides, version examples, in-app tips, and release article; retain the documented Windows x64 beta limits.
+
 ## [0.10.4] - 2026-11-06
 
 Noodle 0.10.4 lets you save a collection run as JSON for scripts or JUnit XML for a CI test viewer. On GitHub Actions, install the CLI with `setup-noodle`, run your collection, and keep the report even when an API check fails.

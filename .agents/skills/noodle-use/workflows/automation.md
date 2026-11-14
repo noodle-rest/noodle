@@ -306,7 +306,7 @@ the binary checksum and adds Noodle to PATH for the following steps.
 ```yaml
 - uses: noodle-rest/setup-noodle@v1
   with:
-    version: v0.10.4
+    version: v0.11.0
 
 - name: Run API tests
   run: noodle collection run ./api --env ci --reporter junit --output results.xml

@@ -69,7 +69,7 @@ After checking out your collection, install Noodle and run it in a separate step
 ```yaml
 - uses: noodle-rest/setup-noodle@v1
   with:
-    version: v0.10.4
+    version: v0.11.0
 - run: noodle collection run ./api --reporter junit --output results.xml
 ```
 
@@ -120,6 +120,8 @@ to create a collection, send your first request, and inspect the response.
   Run requests or folders with tag filters, fail-fast behavior, delays, CSV/JSON
   iteration data, and JSON results. Save collection reports with
   `--json --output results.json` or `--reporter junit --output results.xml`.
+  Preview the selected request order, hooks, and iteration counts with `--dry-run`
+  before sending requests.
   See the [automation contract and CI example](.agents/skills/noodle-use/workflows/automation.md#collection-report-files).
   Optional saved setup and teardown requests
   surround each run or data row; configure them in Collection Settings > General.
@@ -137,7 +139,7 @@ to create a collection, send your first request, and inspect the response.
   Follow your terminal palette or choose a theme, and customize your shortcuts.
 - 🔄 **[Import](https://noodlerest.dev/docs/import/import/) and
   [export](https://noodlerest.dev/docs/import/export/):**
-  Bring OpenAPI, Swagger, Postman, and Insomnia collections into Noodle;
+  Bring OpenAPI 3.0/3.1, Swagger 2.0, Postman, and Insomnia collections into Noodle;
   preserve compatible Postman and Insomnia scripts without translating foreign APIs.
   Imports that retain scripts or tests require a new collection.
   Export to OpenAPI or Postman.

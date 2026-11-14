@@ -792,7 +792,7 @@ describe("checkForUpdates", () => {
         return {
           exitCode: 0,
           stdout: JSON.stringify({
-            formulae: [{ versions: { stable: "0.11.0" } }],
+            formulae: [{ versions: { stable: "99.0.0" } }],
           }),
         }
       },
@@ -800,7 +800,7 @@ describe("checkForUpdates", () => {
     expect(status.kind).toBe("update_available")
     expect(status.installType).toBe("brew")
     if (status.kind === "update_available") {
-      expect(status.latestVersion).toBe("v0.11.0")
+      expect(status.latestVersion).toBe("v99.0.0")
     }
     expect(receivedArgs).toEqual([
       "/opt/homebrew/bin/brew",

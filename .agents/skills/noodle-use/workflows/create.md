@@ -52,7 +52,10 @@ noodle collection create <name> --output <parent-dir> --json
 ```
 
 It creates the collection, `settings.yml`, an empty `development` environment,
-an example request, and registers the absolute path.
+an example request, and registers the absolute path. Create/init also add
+`/.noodle/` and `/.timeline/` to `.gitignore`, preserving existing rules. These
+keep local UI state and response history out of new Git additions; already
+tracked files need separate review.
 
 ### Step 4: Create a customized scaffold
 
