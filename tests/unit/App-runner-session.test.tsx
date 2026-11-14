@@ -127,6 +127,7 @@ it("retains results through App collection switches and navigates source owners 
     }),
   ]
   const notification = spyOn(toast, "showToast").mockImplementation(() => {})
+  const errors = spyOn(console, "error")
   let render: Awaited<ReturnType<typeof testRender>> | undefined
   function Harness() {
     const renderer = useRenderer()
@@ -298,8 +299,10 @@ it("retains results through App collection switches and navigates source owners 
     await act(async () => host.press("f5"))
     expect(runner.result).toBe(retained)
     expect(runner.resultIndex).toBe(1)
-    await rename(join(a, "folder/request.yml"), join(a, "folder/renamed.yml"))
-    await act(async () => app.onReloadCollection())
+    await act(async () => {
+      await rename(join(a, "folder/request.yml"), join(a, "folder/renamed.yml"))
+      await app.onReloadCollection()
+    })
     await waitForHookState(render, () =>
       runner.requests.some((request) => request.id === "folder/renamed"),
     )
@@ -321,10 +324,12 @@ it("retains results through App collection switches and navigates source owners 
       await render!.flush()
     })
     expect(render.captureCharFrame()).toContain("Original request")
+    expect(errors).not.toHaveBeenCalled()
   } finally {
     if (render) await act(async () => render!.renderer.destroy())
     for (const spy of spies) spy.mockRestore()
     notification.mockRestore()
+    errors.mockRestore()
     cleanup()
     await rm(root, { recursive: true, force: true })
   }

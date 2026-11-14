@@ -178,10 +178,22 @@ describe("CLI integration", () => {
     try {
       await mkdir(join(home, ".codex"), { recursive: true })
       const build = Bun.spawnSync(
-        ["bun", "build", "--compile", CLI, "--outfile", binary],
+        [
+          "bun",
+          "build",
+          "--compile",
+          "--define",
+          'process.env.OPENTUI_LIBC="glibc"',
+          CLI,
+          "--outfile",
+          binary,
+        ],
         { cwd: dir },
       )
-      expect(build.exitCode).toBe(0)
+      expect({
+        exitCode: build.exitCode,
+        stderr: build.stderr.toString(),
+      }).toMatchObject({ exitCode: 0 })
 
       const proc = Bun.spawnSync([binary, "--help"])
       expect(proc.exitCode).toBe(0)

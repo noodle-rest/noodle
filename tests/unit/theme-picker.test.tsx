@@ -1,4 +1,4 @@
-import { describe, it, expect } from "bun:test"
+import { describe, it, expect, spyOn } from "bun:test"
 import { act, useState } from "react"
 import { createTestRender } from "../testRender"
 import { KeymapProvider } from "@opentui/keymap/react"
@@ -202,25 +202,39 @@ describe("system ThemeProvider", () => {
       )
     }
 
-    const render = await testRender(<Harness />, { width: 40, height: 4 })
+    const render = await testRender(<Harness />, {
+      width: 40,
+      height: 4,
+      // ThemeProvider observes these first; the test terminal cannot send native OSC queries.
+      prependInputHandlers: [
+        (sequence) =>
+          sequence === "\x1b[?997;1n" || sequence === "\x1b[?997;2n",
+      ],
+    })
     let paletteQueries = 0
     render.renderer.getPalette = async () => {
       paletteQueries++
       return terminalColors()
     }
 
-    await act(() => {
-      render.mockInput.pressKey("\x1b[?997;1n")
-    })
-    await render.renderOnce()
-    expect(paletteQueries).toBe(1)
-    expect(render.captureCharFrame()).toContain("#22ccdd|#ffffff")
+    const errors = spyOn(console, "error")
+    try {
+      await act(() => {
+        render.mockInput.pressKey("\x1b[?997;1n")
+      })
+      await render.renderOnce()
+      expect(paletteQueries).toBe(1)
+      expect(render.captureCharFrame()).toContain("#22ccdd|#ffffff")
 
-    await act(() => {
-      render.mockInput.pressKey("\x1b[?997;2n")
-      leaveSystem()
-    })
-    expect(paletteQueries).toBe(1)
+      await act(() => {
+        render.mockInput.pressKey("\x1b[?997;2n")
+        leaveSystem()
+      })
+      expect(paletteQueries).toBe(1)
+      expect(errors).not.toHaveBeenCalled()
+    } finally {
+      errors.mockRestore()
+    }
   })
 
   it("uses the fallback while refreshing a reselected system theme", async () => {

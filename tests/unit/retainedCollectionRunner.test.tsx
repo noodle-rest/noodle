@@ -1,7 +1,8 @@
-import { describe, expect, it } from "bun:test"
+import { afterAll, afterEach, describe, expect, it, spyOn } from "bun:test"
 import { act, useRef, useState } from "react"
 import { KeymapProvider } from "@opentui/keymap/react"
 import type { ScrollBoxRenderable } from "@opentui/core"
+import { ManualClock } from "@opentui/core/testing"
 import {
   useCollectionRunner,
   type UseCollectionRunnerResult,
@@ -19,6 +20,15 @@ import { createTestRender, waitForHookState } from "../testRender"
 import { setupKeymap } from "./_helpers"
 
 const testRender = createTestRender()
+const consoleErrors = spyOn(console, "error")
+afterEach(() => {
+  try {
+    expect(consoleErrors).not.toHaveBeenCalled()
+  } finally {
+    consoleErrors.mockClear()
+  }
+})
+afterAll(() => consoleErrors.mockRestore())
 const collection: Collection = {
   id: "collection",
   name: "Collection",
@@ -137,7 +147,14 @@ async function harness() {
       </KeymapProvider>
     )
   }
-  const render = await testRender(<Harness />, { width: 100, height: 30 })
+  const render = await act(async () =>
+    testRender(<Harness />, {
+      width: 100,
+      height: 30,
+      // Drive native layout through renderOnce so resize updates stay inside act.
+      clock: new ManualClock(),
+    }),
+  )
   return {
     render,
     get: () => runner,
