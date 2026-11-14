@@ -6,6 +6,7 @@ import {
   describe,
   expect,
   it,
+  setDefaultTimeout,
 } from "bun:test"
 import {
   mkdir,
@@ -24,6 +25,9 @@ import { compileWindowsFixture, windowsPowerShell } from "./windowsTestHelpers"
 const installer = join(import.meta.dir, "../scripts/install.ps1")
 
 describe.skipIf(process.platform !== "win32")("PowerShell installer", () => {
+  // Cold PowerShell startup and native executable checks need an integration-test budget.
+  setDefaultTimeout(120_000)
+
   let fixtures: string
   let binary: string
   let hash: string
@@ -55,6 +59,8 @@ describe.skipIf(process.platform !== "win32")("PowerShell installer", () => {
       wrapper,
       `
 $ErrorActionPreference = "Stop"
+$testTimer = [Diagnostics.Stopwatch]::StartNew()
+[Console]::Error.WriteLine("[installer test] wrapper started at $([DateTime]::UtcNow.ToString('o'))")
 function Invoke-WebRequest {
   param([switch]$UseBasicParsing, [string]$Uri, [string]$OutFile)
   [IO.File]::AppendAllText($env:NOODLE_TEST_DOWNLOADS, "$Uri\n")
@@ -74,6 +80,7 @@ $code = $code.Replace('[Microsoft.Win32.Registry]::CurrentUser.CreateSubKey("Env
 $code = $code.Replace('[Environment]::SetEnvironmentVariable($pathRefreshName, "1", "User")', '[IO.File]::AppendAllText($env:NOODLE_TEST_PATH_MARKER + ".refresh", "set\n")')
 $code = $code.Replace('[Environment]::SetEnvironmentVariable($pathRefreshName, $null, "User")', '[IO.File]::AppendAllText($env:NOODLE_TEST_PATH_MARKER + ".refresh", "clear\n")')
 if ($code.Contains('[Environment]::SetEnvironmentVariable') -or $code.Contains('CreateSubKey("Environment")')) { throw "User PATH test interception failed" }
+[Console]::Error.WriteLine("[installer test] invoking installer at $($testTimer.ElapsedMilliseconds) ms")
 try {
   if ($env:NOODLE_TEST_LOCK -eq "1") {
     $lock = [IO.File]::Open((Join-Path $env:NOODLE_INSTALL_DIR "noodle.exe"), "Open", "ReadWrite", "None")
@@ -89,6 +96,7 @@ try {
     [IO.File]::WriteAllText($env:NOODLE_TEST_PATH_MARKER + ".session", "survived;failure=$caught")
   } else { Invoke-Expression $code }
 } finally {
+  [Console]::Error.WriteLine("[installer test] installer returned; registry cleanup at $($testTimer.ElapsedMilliseconds) ms")
   if ($lock) { $lock.Dispose() }
   $registryKey = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey($registryPath)
   try {
@@ -101,6 +109,7 @@ try {
     $registryKey.Dispose()
     [Microsoft.Win32.Registry]::CurrentUser.DeleteSubKeyTree($registryPath)
   }
+  [Console]::Error.WriteLine("[installer test] wrapper finished at $($testTimer.ElapsedMilliseconds) ms")
 }
 `,
     )
@@ -110,6 +119,8 @@ try {
   })
 
   async function run(environment: Record<string, string | undefined> = {}) {
+    const startedAt = new Date().toISOString()
+    const deadline = AbortSignal.timeout(90_000)
     const child = Bun.spawn(
       [
         windowsPowerShell,
@@ -135,6 +146,8 @@ try {
           NOODLE_TEST_HOME: home,
           HOME: home,
           USERPROFILE: home,
+          // LOCALAPPDATA is a fresh fixture; keep PowerShell's background cache out of it.
+          PSModuleAnalysisCachePath: "nul",
           NOODLE_TEST_DOWNLOADS: join(directory, "downloads"),
           NOODLE_TEST_PATH_MARKER: pathMarker,
           NOODLE_TEST_USER_PATH: "C:\\Windows",
@@ -142,6 +155,8 @@ try {
         },
         stdout: "pipe",
         stderr: "pipe",
+        signal: deadline,
+        killSignal: "SIGKILL",
       },
     )
     const [stdout, stderr, exitCode] = await Promise.all([
@@ -149,6 +164,11 @@ try {
       new Response(child.stderr).text(),
       child.exited,
     ])
+    if (deadline.aborted) {
+      throw new Error(
+        `PowerShell installer exceeded 90000 ms (started ${startedAt}, exit ${exitCode}).\n${stdout}\n${stderr}`,
+      )
+    }
     return { stdout, stderr, exitCode }
   }
 
