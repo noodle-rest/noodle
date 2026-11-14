@@ -176,9 +176,9 @@ describe("ScriptConsole", () => {
     await act(async () => h.renderOnce())
     expect(scroll.verticalScrollBar.visible).toBe(true)
     expect(
-      scroll.verticalScrollBar.slider.foregroundColor.equals(
-        RGBA.fromHex(THEMES[0]!.borderActive),
-      ),
+      scroll.verticalScrollBar
+        ._native()
+        .foregroundColor.equals(RGBA.fromHex(THEMES[0]!.borderActive)),
     ).toBe(true)
     await act(async () => {
       host.press("end")

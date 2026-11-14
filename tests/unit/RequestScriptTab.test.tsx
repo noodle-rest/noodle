@@ -342,23 +342,82 @@ async function mount({
 
 describe("request script references", () => {
   it.each(["pre", "post", "tests"] as const)(
+    "keeps one scrollbar for an inherited inline %s editor while resizing",
+    async (phase) => {
+      const source = Array.from(
+        { length: 40 },
+        (_, line) => `console.log("line ${line + 1}")`,
+      ).join("\n")
+      const h = await mount({ own: source, phase, width: 80, height: 9 })
+      for (const [width, height] of [
+        [80, 9],
+        [40, 12],
+        [100, 24],
+        [60, 8],
+      ] as const) {
+        await act(async () => h.resize(width, height))
+        await h.frame()
+        const workspace = h.renderer.root.findDescendantById(
+          "script-workspace",
+        ) as ScrollBoxRenderable | undefined
+        expect(workspace?.verticalScrollBar.visible ?? false).toBe(false)
+        const editor = h.editor()
+        const scrollbar =
+          h.renderer.root.findDescendantById("script-scrollbar")!
+        expect(scrollbar.visible).toBe(true)
+        expect(editor.screenY + editor.height).toBeLessThanOrEqual(height - 1)
+        await act(async () => editor.scrollTo(editor.totalVirtualLineCount))
+        expect(await h.frame()).toContain('console.log("line 40")')
+      }
+      expect(
+        phase === "tests" ? h.request().tests : h.request().scripts?.[phase],
+      ).toBe(source)
+    },
+  )
+
+  it.each(["pre", "post", "tests"] as const)(
+    "preserves the external %s path editor while clearing and retyping its value",
+    async (phase) => {
+      const h = await mount({ own: "./request.js", phase, height: 7 })
+      await h.press("down")
+      await h.press("return")
+      const path = h.renderer.root.findDescendantById(
+        "script-path",
+      ) as InputRenderable
+      expect(path.focused).toBe(true)
+      await act(async () => path.deleteLine())
+      await h.frame()
+      expect(h.renderer.root.findDescendantById("script-path")).toBe(path)
+      expect(h.editor()).toBeUndefined()
+      expect(path.focused).toBe(true)
+      await act(async () => path.insertText("./request.js"))
+      await h.frame()
+      expect(h.renderer.root.findDescendantById("script-path")).toBe(path)
+      expect(path.focused).toBe(true)
+      expect(
+        phase === "tests" ? h.request().tests : h.request().scripts?.[phase],
+      ).toBe("./request.js")
+    },
+  )
+
+  it.each(["pre", "post", "tests"] as const)(
     "themes the external %s workspace scrollbar",
     async (phase) => {
-      const h = await mount({ own: "./request.js", phase, height: 9 })
+      const h = await mount({ own: "./request.js", phase, height: 7 })
       const workspace = h.renderer.root.findDescendantById(
         "script-workspace",
       ) as ScrollBoxRenderable
       const scrollbar = workspace.verticalScrollBar
       expect(scrollbar.visible).toBe(true)
       expect(
-        scrollbar.slider.backgroundColor.equals(
-          RGBA.fromHex(THEMES[0]!.background),
-        ),
+        scrollbar
+          ._native()
+          .backgroundColor.equals(RGBA.fromHex(THEMES[0]!.background)),
       ).toBe(true)
       expect(
-        scrollbar.slider.foregroundColor.equals(
-          RGBA.fromHex(THEMES[0]!.borderActive),
-        ),
+        scrollbar
+          ._native()
+          .foregroundColor.equals(RGBA.fromHex(THEMES[0]!.borderActive)),
       ).toBe(true)
     },
   )
@@ -654,7 +713,7 @@ describe("request script references", () => {
     expect(details.scrollHeight).toBeLessThanOrEqual(details.viewport.height)
     await h.press("end")
     const compactFrame = await h.frame()
-    expect(compactFrame).toMatch(/This request +Exte.*file/)
+    expect(compactFrame).toMatch(/This\.\.\.uest +Exte\.\.\. file/)
     expect(
       h.renderer.root.findDescendantById("script-reference-1")!.height,
     ).toBe(1)

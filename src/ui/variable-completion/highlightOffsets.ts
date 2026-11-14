@@ -1,19 +1,23 @@
-export function buildCharToDisplayOffsets(content: string): number[] {
+import { measureEditText, type WidthMethod } from "@opentui/core"
+
+const graphemes = new Intl.Segmenter(undefined, { granularity: "grapheme" })
+
+export function buildCharToDisplayOffsets(
+  content: string,
+  widthMethod: WidthMethod = "unicode",
+): number[] {
   const offsets = new Array<number>(content.length + 1)
   let displayOffset = 0
 
-  for (let index = 0; index < content.length;) {
-    offsets[index] = displayOffset
-    const codePoint = content.codePointAt(index)
-    if (codePoint === undefined) break
-
-    const width = codePoint > 0xffff ? 2 : 1
-    for (let unit = 1; unit < width; unit++) {
+  for (const { segment, index } of graphemes.segment(content)) {
+    for (let unit = 0; unit < segment.length; unit++)
       offsets[index + unit] = displayOffset
-    }
-
-    index += width
-    if (codePoint !== 0x0a && codePoint !== 0x0d) displayOffset++
+    displayOffset +=
+      segment === "\t"
+        ? 2
+        : widthMethod === "wcwidth" && segment.codePointAt(0)! > 0x7f
+          ? measureEditText(segment, { widthMethod })
+          : Bun.stringWidth(segment)
   }
 
   offsets[content.length] = displayOffset

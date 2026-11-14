@@ -223,6 +223,7 @@ describe("ResponseResults", () => {
       host.press("return")
       await renderOnce()
     })
+    await renderOnce()
     expect(captureCharFrame()).toContain("FAIL POST login (401), 8ms, http")
     expect(captureCharFrame()).toContain("https://example.test/login")
     await act(async () => {

@@ -305,14 +305,14 @@ describe("AssertTab", () => {
       expect(operatorScrollbox.height).toBe(10)
       expect(operatorScrollbox.verticalScrollBar.visible).toBe(true)
       expect(
-        operatorScrollbox.verticalScrollBar.slider.backgroundColor.equals(
-          RGBA.fromHex(THEMES[0]!.background),
-        ),
+        operatorScrollbox.verticalScrollBar
+          ._native()
+          .backgroundColor.equals(RGBA.fromHex(THEMES[0]!.background)),
       ).toBe(true)
       expect(
-        operatorScrollbox.verticalScrollBar.slider.foregroundColor.equals(
-          RGBA.fromHex(THEMES[0]!.borderActive),
-        ),
+        operatorScrollbox.verticalScrollBar
+          ._native()
+          .foregroundColor.equals(RGBA.fromHex(THEMES[0]!.borderActive)),
       ).toBe(true)
       expect(render.captureCharFrame()).not.toContain("notEquals")
 
@@ -485,6 +485,7 @@ describe("AssertTab", () => {
       const render = await testRender(<Harness />, { width: 40, height: 12 })
       await render.renderOnce()
       await act(async () => render.renderOnce())
+      await act(async () => render.flush())
       expect(render.captureCharFrame()).toContain("profile")
       await act(async () => host.press("return"))
       await render.renderOnce()

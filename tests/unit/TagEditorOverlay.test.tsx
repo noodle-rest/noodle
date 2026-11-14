@@ -193,7 +193,7 @@ describe("TagEditorOverlay", () => {
     const handleReady = (next: () => void) => {
       open = next
     }
-    const { renderOnce, captureCharFrame, mockMouse } = await testRender(
+    const { renderOnce, captureCharFrame, mockMouse, flush } = await testRender(
       <KeymapProvider keymap={keymap}>
         <ThemeProvider activeIndex={0} previewIndex={null}>
           <OpeningHarness
@@ -214,6 +214,7 @@ describe("TagEditorOverlay", () => {
     await act(async () => {
       await renderOnce()
     })
+    await act(async () => flush())
     const frame = captureCharFrame()
     expect(frame.indexOf("smoke")).toBeLessThan(frame.indexOf("users"))
     expect(frame.match(/users/g)).toHaveLength(1)

@@ -1,4 +1,4 @@
-import type { SyntaxStyle } from "@opentui/core"
+import type { SyntaxStyle, WidthMethod } from "@opentui/core"
 import {
   buildCharToDisplayOffsets,
   charOffsetToDisplayOffset,
@@ -27,8 +27,9 @@ export function javascriptTokens(source: string) {
 export function buildJavascriptHighlightRanges(
   source: string,
   style: SyntaxStyle,
+  widthMethod: WidthMethod = "unicode",
 ): EditorHighlightRange[] {
-  const offsets = buildCharToDisplayOffsets(source)
+  const offsets = buildCharToDisplayOffsets(source, widthMethod)
   return javascriptTokens(source).map((token) => ({
     start: charOffsetToDisplayOffset(offsets, token.start),
     end: charOffsetToDisplayOffset(offsets, token.end),

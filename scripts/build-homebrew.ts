@@ -38,9 +38,9 @@ const run = async (command: string[], cwd = root, env = process.env) => {
 const zigVersion = Bun.spawnSync([values.zig, "version"])
 if (
   zigVersion.exitCode !== 0 ||
-  zigVersion.stdout.toString().trim() !== "0.16.0"
+  zigVersion.stdout.toString().trim() !== "0.17.1"
 )
-  throw new Error("The Homebrew source build requires Zig 0.16.0")
+  throw new Error("The Homebrew source build requires Zig 0.17.1")
 await run([
   process.execPath,
   "install",
@@ -60,7 +60,8 @@ if (upstream.version !== installed.version)
   )
 const nativeRoot = join(source, "packages/native")
 await run(["sh", "scripts/prepare-zig-deps.sh"], nativeRoot)
-await run([values.zig, "build", "-Doptimize=ReleaseFast"], nativeRoot)
+// Noodle previews still images and does not need FFmpeg video decoding.
+await run([values.zig, "build", "-Doptimize=ReleaseFast", "-Dvideo=false"], nativeRoot)
 const arch = process.arch === "arm64" ? "aarch64" : "x86_64"
 const triple = `${arch}-${process.platform === "darwin" ? "macos" : "linux"}`
 const library = `libopentui.${process.platform === "darwin" ? "dylib" : "so"}`

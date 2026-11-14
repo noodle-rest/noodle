@@ -1,4 +1,5 @@
-import { describe, expect, it } from "bun:test"
+import { afterEach, beforeEach, describe, expect, it, spyOn } from "bun:test"
+import { ResourceContext } from "@opentui/core"
 import type {
   SimpleHighlight,
   SyntaxStyle,
@@ -8,16 +9,24 @@ import { opencodeTheme } from "../../src/ui/theme-data"
 import { CodeEditorHighlightRenderer } from "../../src/ui/editor/codeEditorHighlightRenderer"
 import type { EditorHighlightRange } from "../../src/ui/editor/codeEditorHighlighting"
 
+let owner: ResourceContext
+beforeEach(() => {
+  owner = new ResourceContext({ objectCapacity: 1024, renderCellsMax: 1 })
+})
+afterEach(() => owner.destroy())
+
 function createHost() {
-  let style: SyntaxStyle | undefined
+  let style: SyntaxStyle | null | undefined
   const ranges: EditorHighlightRange[] = []
 
   return {
     host: {
+      owner,
+      widthMethod: "unicode" as const,
       clear: () => {
         ranges.length = 0
       },
-      setStyle: (next: SyntaxStyle) => {
+      setStyle: (next: SyntaxStyle | null) => {
         style = next
       },
       applyRanges: (next: EditorHighlightRange[]) => {
@@ -30,6 +39,23 @@ function createHost() {
 }
 
 describe("CodeEditorHighlightRenderer", () => {
+  it("releases replaced styles and its final style", () => {
+    const { host, getStyle } = createHost()
+    const renderer = new CodeEditorHighlightRenderer(
+      opencodeTheme,
+      undefined,
+      host,
+    )
+    renderer.prepare()
+    const previous = spyOn(getStyle()!, "destroy")
+    renderer.setTheme({ ...opencodeTheme, primary: "#123456" })
+    expect(previous).toHaveBeenCalledTimes(1)
+    const current = spyOn(getStyle()!, "destroy")
+    renderer.destroy()
+    expect(current).toHaveBeenCalledTimes(1)
+    expect(getStyle()).toBeNull()
+  })
+
   it("drops replaced tokens and resets cached colors when the language changes", async () => {
     const { host, ranges } = createHost()
     const renderer = new CodeEditorHighlightRenderer(
@@ -225,7 +251,7 @@ describe("CodeEditorHighlightRenderer", () => {
 
     expect(stringRange).toEqual({
       start: 12,
-      end: 21,
+      end: 22,
       styleId: stringStyleId,
       priority: 1,
     })
@@ -253,7 +279,7 @@ describe("CodeEditorHighlightRenderer", () => {
 
     expect(ranges).toContainEqual({
       start: 11,
-      end: 19,
+      end: 20,
       styleId: getStyle()!.getStyleId("json.string") ?? 0,
       priority: 1,
     })
@@ -281,7 +307,7 @@ describe("CodeEditorHighlightRenderer", () => {
 
     expect(ranges).toContainEqual({
       start: 6,
-      end: 14,
+      end: 15,
       styleId: getStyle()!.getStyleId("yaml.text") ?? 0,
       priority: 1,
     })

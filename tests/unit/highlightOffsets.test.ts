@@ -75,12 +75,18 @@ describe("buildCharToDisplayOffsets", () => {
     expect(offsets[4]).toBe(2)
   })
 
-  it("handles surrogate pairs as single display column", () => {
+  it("maps surrogate pairs to their display width", () => {
     const offsets = buildCharToDisplayOffsets("a😀b")
     expect(offsets[0]).toBe(0)
     expect(offsets[1]).toBe(1)
     expect(offsets[2]).toBe(1)
-    expect(offsets[3]).toBe(2)
+    expect(offsets[3]).toBe(3)
+  })
+
+  it("keeps wide, combined, and tabbed text aligned with display cells", () => {
+    expect(buildCharToDisplayOffsets("界\te\u0301👩‍💻x")).toEqual([
+      0, 2, 4, 4, 5, 5, 5, 5, 5, 7, 8,
+    ])
   })
 
   it("handles surrogate pairs with newlines", () => {
@@ -89,7 +95,7 @@ describe("buildCharToDisplayOffsets", () => {
     expect(offsets[1]).toBe(1)
     expect(offsets[2]).toBe(1)
     expect(offsets[3]).toBe(1)
-    expect(offsets[4]).toBe(2)
+    expect(offsets[4]).toBe(3)
   })
 
   it("last element equals display length excluding newlines", () => {

@@ -461,7 +461,7 @@ describe("shared autocomplete", () => {
       expect(rowCount()).toBeLessThanOrEqual(16)
       await view.press("down")
       expect(view.captureCharFrame()).toContain(many[0]!)
-      const slider = view.scroll().verticalScrollBar.slider
+      const slider = view.scroll().verticalScrollBar
       await act(async () => {
         await view.mockMouse.drag(
           slider.x,
@@ -586,7 +586,7 @@ describe("shared autocomplete", () => {
         await view.render()
         expect(scroll.scrollTop).toBeGreaterThan(0)
         expect(editor.focused).toBe(true)
-        const slider = scroll.verticalScrollBar.slider
+        const slider = scroll.verticalScrollBar
         await act(async () => {
           await view.mockMouse.drag(
             slider.x,

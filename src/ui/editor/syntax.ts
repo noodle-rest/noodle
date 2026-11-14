@@ -1,4 +1,6 @@
+import type { WidthMethod } from "@opentui/core"
 import type { Theme } from "../theme-data"
+import { buildCharToDisplayOffsets } from "../variable-completion/highlightOffsets"
 
 export interface SpanPart {
   text: string
@@ -106,18 +108,21 @@ export function highlightJson(
 export function highlightJsonTokens(
   formatted: string,
   theme: Theme,
+  widthMethod: WidthMethod = "unicode",
 ): JsonToken[] {
   const tokens: JsonToken[] = []
   if (formatted.trim() === "") return tokens
   const isWhitespace = (char: string) => /\s/.test(char)
   const literalRe = /(?:true|false|null)(?!\w)/y
   const numberRe = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?(?![\w.])/y
+  const displayOffsets = buildCharToDisplayOffsets(formatted, widthMethod)
   let displayOffset = 0
   const advance = (offset: number): number => {
     const codePoint = formatted.codePointAt(offset)
     if (codePoint === undefined) return offset
-    if (codePoint !== 0x0a && codePoint !== 0x0d) displayOffset++
-    return offset + (codePoint > 0xffff ? 2 : 1)
+    const next = offset + (codePoint > 0xffff ? 2 : 1)
+    displayOffset = displayOffsets[next]!
+    return next
   }
   const pushToken = (
     start: number,

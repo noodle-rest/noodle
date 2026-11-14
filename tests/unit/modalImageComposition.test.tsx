@@ -297,7 +297,6 @@ async function mount(
       height,
       stdout,
       bufferedOutput: "stdout",
-      useThread: false,
     }),
   )
   setRendererCapabilities(setup.renderer, {
@@ -353,7 +352,9 @@ describe("images beneath modal backdrops", () => {
       await setup.render()
       const buffer = setup.renderer.currentRenderBuffer
       expect(
-        Array.from(buffer.buffers.fg.slice(0, 3), (value) => value & 255),
+        buffer.withBuffers(({ fg }) =>
+          Array.from(fg.slice(0, 3), (value) => value & 255),
+        ),
       ).toEqual([43, 43, 43])
       expect(placements.length).toBeGreaterThan(0)
       for (const placement of placements) {
@@ -405,12 +406,14 @@ describe("images beneath modal backdrops", () => {
         const panel = backdrop.getChildren()[0]!
         const buffer = setup.renderer.currentRenderBuffer
         const color = (kind: "fg" | "bg", x: number, y: number) =>
-          Array.from(
-            buffer.buffers[kind].slice(
-              (y * buffer.width + x) * 4,
-              (y * buffer.width + x) * 4 + 3,
+          buffer.withBuffers((buffers) =>
+            Array.from(
+              buffers[kind].slice(
+                (y * buffer.width + x) * 4,
+                (y * buffer.width + x) * 4 + 3,
+              ),
+              (value) => value & 255,
             ),
-            (value) => value & 255,
           )
         expect(color("fg", 0, 0)).toEqual([105, 105, 105])
         const background = RGBA.fromHex(opencodeTheme.backgroundPanel).toInts()
@@ -476,7 +479,8 @@ describe("images beneath modal backdrops", () => {
               y >= panel.y &&
               y < panel.y + panel.height
             const isImage =
-              (buffer.buffers.char[y * buffer.width + x]! & 0xc0000000) ===
+              (buffer.withBuffers(({ char }) => char[y * buffer.width + x]!) &
+                0xc0000000) ===
               0x40000000
             expect(isImage).toBe(!covered)
             if (isImage) visible++
@@ -622,7 +626,8 @@ describe("images beneath modal backdrops", () => {
             x++
           ) {
             expect(
-              (buffer.buffers.char[y * buffer.width + x]! & 0xc0000000) ===
+              (buffer.withBuffers(({ char }) => char[y * buffer.width + x]!) &
+                0xc0000000) ===
                 0x40000000,
             ).toBe(false)
           }

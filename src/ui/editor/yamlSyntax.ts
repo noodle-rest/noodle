@@ -1,18 +1,24 @@
 import type { Theme } from "../theme-data"
-import { SyntaxStyle } from "@opentui/core"
+import { SyntaxStyle, type NativeResourceOwner } from "@opentui/core"
 import type { TextareaRenderable } from "@opentui/core"
 
-export function createYamlSyntaxStyle(theme: Theme): SyntaxStyle {
-  return SyntaxStyle.fromStyles({
-    "yaml.key": { fg: theme.secondary },
-    "yaml.string": { fg: theme.success },
-    "yaml.number": { fg: theme.warning },
-    "yaml.boolean": { fg: theme.info },
-    "yaml.null": { fg: theme.info },
-    "yaml.punctuation": { fg: theme.textMuted },
-    "yaml.comment": { fg: theme.textMuted },
-    "yaml.text": { fg: theme.text },
-  })
+export function createYamlSyntaxStyle(
+  theme: Theme,
+  owner: NativeResourceOwner,
+): SyntaxStyle {
+  return SyntaxStyle.fromStyles(
+    {
+      "yaml.key": { fg: theme.secondary },
+      "yaml.string": { fg: theme.success },
+      "yaml.number": { fg: theme.warning },
+      "yaml.boolean": { fg: theme.info },
+      "yaml.null": { fg: theme.info },
+      "yaml.punctuation": { fg: theme.textMuted },
+      "yaml.comment": { fg: theme.textMuted },
+      "yaml.text": { fg: theme.text },
+    },
+    owner,
+  )
 }
 
 export function styleIdForFg(
@@ -175,7 +181,7 @@ export function highlightYaml(
   theme: Theme,
 ): void {
   if (content.length > MAX_YAML_HIGHLIGHT_SIZE) return
-  const style = createYamlSyntaxStyle(theme)
+  const style = createYamlSyntaxStyle(theme, textarea.ctx.nativeScene)
   textarea.clearAllHighlights()
   textarea.syntaxStyle = style
 

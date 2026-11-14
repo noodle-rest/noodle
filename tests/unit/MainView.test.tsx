@@ -507,7 +507,9 @@ describe("MainView", () => {
     })
     await renderOnce()
     await act(async () => flush())
-    expect(renderer.root.getLayoutNode().isDirty()).toBe(false)
+    const layout = main.getLayout()
+    await act(async () => renderOnce())
+    expect(main.getLayout()).toEqual(layout)
     expect(split.screenX + split.width).toBe(main.screenX + main.width)
     expect(responseSlot.screenX + responseSlot.width).toBe(
       split.screenX + split.width,

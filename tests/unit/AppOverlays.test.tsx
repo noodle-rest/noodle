@@ -109,7 +109,7 @@ async function renderOverlays(
     overlays: makeOverlayState(overlayState),
     ...extraProps,
   } as Parameters<typeof AppOverlays>[0]
-  const { renderOnce, captureCharFrame } = await testRender(
+  const { renderOnce, captureCharFrame, flush } = await testRender(
     <KeymapProvider keymap={keymap}>
       <ThemeProvider activeIndex={0} previewIndex={null}>
         <AppOverlays {...props} />
@@ -121,6 +121,7 @@ async function renderOverlays(
     await renderOnce()
     await renderOnce()
   })
+  await act(async () => flush())
   // Overlay text wraps to the frame width, so compare against a
   // whitespace-normalized frame instead of the raw character grid.
   const frame = captureCharFrame().replace(/\s+/g, " ").trim()

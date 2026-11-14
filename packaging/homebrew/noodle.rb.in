@@ -6,17 +6,15 @@ class Noodle < Formula
   license "Apache-2.0"
 
   depends_on "bun" => :build
-  # TODO: Use zig when Noodle's OpenTUI build supports Zig 0.17.
-  # https://github.com/anomalyco/opentui/pull/1586
-  depends_on "zig@0.16" => :build
+  depends_on "zig" => :build
 
   on_linux do
     depends_on "icu4c@78"
   end
 
   resource "opentui" do
-    url "https://github.com/anomalyco/opentui/archive/refs/tags/v0.5.14.tar.gz"
-    sha256 "0e092b7405934c3a30f6eca2cb6e35eb00d9d8948d15daa69af2371e1e641a6e"
+    url "https://github.com/anomalyco/opentui/archive/refs/tags/v0.9.0.tar.gz"
+    sha256 "d341c779acf0ee265500fdddf74ab6704b95715dd918d0c019d0749a5b30be40"
   end
 
   deny_network_access!
@@ -32,7 +30,7 @@ class Noodle < Formula
     system "bun", "run", "build:homebrew",
            "--offline",
            "--opentui-source", buildpath/"opentui",
-           "--zig", formula_opt_bin("zig@0.16")/"zig",
+           "--zig", formula_opt_bin("zig")/"zig",
            "--cc", ENV.cc
     bin.install "noodle"
     pkgshare.install "LICENSE"
