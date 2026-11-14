@@ -381,7 +381,8 @@ describe("post-response lifecycle", () => {
       jar
         .scriptTransaction("http://example.com/api/users", () => {})!
         .set({ name: "secure", value: "v", secure: true }),
-    ).toThrow("not applicable")
+    ).toThrow("not a secure connection")
+    expect(jar.list().some((cookie) => cookie.name === "secure")).toBe(false)
     const secure = jar.scriptTransaction(
       "http://localhost/api/users",
       () => {},
