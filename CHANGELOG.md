@@ -4,6 +4,12 @@ All notable changes to Noodle are documented in this file.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-22
+
+Noodle 1.0.0 marks the start of the 1.x series. It carries forward the features and behavior of 0.11.0.
+
+[Read the Noodle 1.0 release post.](https://noodlerest.dev/blog/noodle-1-0-0/)
+
 ## [0.11.0] - 2026-11-14
 
 Noodle 0.11.0 imports OpenAPI 3.1 documents, including FastAPI schemas, into editable collections. Preview a collection run's selected requests, hooks, and iteration counts with `--dry-run` before sending anything. This release also protects local collection data and updates the terminal renderer with fixes for highlighting, scrolling, and shutdown.
