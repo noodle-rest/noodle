@@ -404,7 +404,7 @@ describe("StatusBar component", () => {
           kb={kb}
           view="main"
           collectionMode="empty"
-          collectionPath="/Users/carlosmontecinos/Projects/noodle/empty-folder"
+          collectionPath="/Users/carlosmontecinos/Projects/noodle/noodle/empty-folder"
           globalHints={emptyHints}
           footerHints={emptyHints}
         />
