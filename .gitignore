@@ -27,3 +27,4 @@ openapi.yml
 emptyfolder
 /noodle
 *.bun-build
+.claude/settings.local.json
